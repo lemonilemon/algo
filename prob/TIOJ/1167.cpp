@@ -23,56 +23,24 @@ void safe() {
 #endif // local
 using namespace std;
 using ll = long long int;
-const int MAXN = 2e5 + 5;
-int mabs(ll a, int mod) {
-	return (a % mod + mod) % mod;
-}
-int cyclecnt;
-int t[MAXN], color[MAXN], dis[MAXN];
-vector<int> cycle[MAXN];
-pair<int, int> incycle[MAXN];
-vector<int> stk;
-void dfs(int u) {
-	color[u] = 1;
-	stk.push_back(u);
-	int v = t[u];
-	if(!color[v]) {
-		dfs(v);
-		incycle[u] = incycle[v];
-		if(incycle[u]) dis[u] = dis[v] + 1;
-	} else if(color[v] == 1) {
-		++cyclecnt;
-		auto st = stk.begin();
-		while(*st != v) ++st;	
-	} else {
-		incycle[u] = incycle[v];
-		incycle[u].second;
-	}
-	stk.pop_back();
-	color[u] = 2;
-}
+const int MAXN = 1e6 + 5;
+ll v[MAXN];
+int N, k;
 void solve() {
-	int n, q;
-	cin >> n >> q;
-	for(int i = 1; i <= n; ++i) {
-		cin >> t[i];
+	for(int i = 0; i < N; ++i) {
+		cin >> v[i];
 	}
-	for(int i = 1; i <= n; ++i) {
-		if(!color[i]) {
-
-		}
-	}
-	for(int i = 1; i <= n; ++i) {
-		debug(i), debug(incycle[i].first), debug(incycle[i].second);
-	}
+	sort(v, v + N);
+	cout << v[N - k] << '\n';
 }
 
 int main() {
 	ios::sync_with_stdio(0);
 	cin.tie(0);
-	int T = 1;
+	//int T = 1;
 	//cin >> T;
-	for(int t = 1; t <= T; ++t) {
+	while(cin >> N >> k) {
+		if(!N && !k) break;
 		//cout << "Case " << t << ": ";
 		solve();
 	}
