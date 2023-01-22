@@ -1,6 +1,5 @@
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
-#define local
 #ifdef local
 using std::cerr;
 #define debug(arg) deone(#arg, arg) 
@@ -28,35 +27,56 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MAXN = 105, MAXK = 105, MAXD = 105;
-ll dp[MAXK][MAXD];
-int K, N, D;
-int mabs(ll a) {
-	return (a % D + D) % D;
+const int MAXN = 2e5 + 5;
+int a[MAXN];
+ll sum;
+int N, M, K;
+multiset<int> L, R;
+void add(int k) {
+	if((int)L.size() < K) {
+		sum += k;
+		L.insert(k);
+		return;
+	}
+	if(k < *prev(L.end())) {
+		auto l = prev(L.end());
+		int lval = *l;
+		L.erase(l);
+		sum -= lval;
+		sum += k;
+		L.insert(k);
+		R.insert(lval);
+	} else R.insert(k);
 }
-int madd(int a, int b) {
-	return mabs(a + b);
+void remove(int k) {
+	if(R.find(k) != R.end()) {
+		R.erase(R.find(k));
+		return;
+	}
+	L.erase(L.find(k));
+	sum -= k;
+	auto r = R.begin();
+	int rval = *r; 
+	R.erase(r);
+	sum += rval;
+	L.insert(rval);
 }
 void solve() {
-	cin >> N >> K >> D;
-	for(int i = 0; i <= K; ++i) {
-		for(int j = 0; j < D; ++j) {
-			dp[i][j] = -1;
-		}
-	}
-	dp[0][0] = 0;
+	cin >> N >> M >> K;
 	for(int i = 0; i < N; ++i) {
-		int a;
-		cin >> a;
-		for(int j = 1; j <= K; ++j) {
-			for(int k = 0; k < D; ++k) {
-				if(dp[j - 1][madd(k, -a)] == -1) continue;
-				else dp[j][k] = max(dp[j][k], dp[j - 1][madd(k, -a)] + a);
-				debug(j), debug(k), debug(dp[j][k]);
-			}
-		}
+		cin >> a[i];
 	}
-	cout << dp[K][0] << '\n';
+	for(int i = 0; i < M; ++i) {
+		add(a[i]);	
+		debug(i), debug(sum);
+	}
+	cout << sum;
+	for(int i = M; i < N; ++i) {
+		remove(a[i - M]);
+		add(a[i]);
+		cout << ' ' << sum;
+	}
+	cout << '\n';
 }
 
 int main() {
