@@ -35,8 +35,14 @@ void solve() {
 	vector<char> op;
 	while(cin >> c) {
 		if(c == '=') break;	
-		if(c == '+') op.push_back(c);	
-		else if(c == '-') op.push_back(c);	
+		if(c == '+') {
+			++poscnt;
+			op.push_back(c);	
+		}
+		else if(c == '-') {
+			++negcnt;
+			op.push_back(c);	
+		}
 	}
 	int n;
 	cin >> n;
@@ -71,7 +77,7 @@ void solve() {
 			neg[idx] += n - 1;
 			cur -= n - 1;
 		} else {
-			neg[idx] -= cur - n;
+			neg[idx] += cur - n;
 			cur = n;
 		}
 		++idx;
