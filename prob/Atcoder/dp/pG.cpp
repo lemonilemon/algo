@@ -28,77 +28,41 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MAXN = 2e5 + 5, MOD = 998244353;
-int p[MAXN], q[MAXN], tq[MAXN];
-int fac[MAXN];
-int mabs(ll a) {
-	return (a % MOD + MOD) % MOD;
-}
-int madd(int a, int b) {
-	return mabs(a + b);
-}
-int mmul(int a, int b) {
-	return mabs(1ll * a * b);
-}
-int fastpow(int a, int b) {
-	int ret = 1;
-	while(b) {
-		if(b & 1) ret = mmul(ret, a);
-		a = mmul(a, a);
-		b >>= 1;
-	}
-	return ret;
-}
-int modinv(int a) {
-	return fastpow(a, MOD - 2);
-}
-int C(int n, int m) {
-	return fac[n] * modinv(mmul(fac[m], fac[n - m]));	
-}
-void init() {
-	fac[0] = 1;
-	for(int i = 1; i < MAXN; ++i) {
-		fac[i] = mmul(fac[i - 1], i);
-	}
-}
+
+const int MAXN = 1e5 + 5;
+vector<int> graph[MAXN];
+int indeg[MAXN], dp[MAXN];
 void solve() {
-	int N;
-	cin >> N;
+	int N, M;
+	cin >> N >> M;
+	for(int i = 0; i < M; ++i) {
+		int u, v;
+		cin >> u >> v;
+		graph[u].emplace_back(v);
+		++indeg[v];
+	}
+	queue<int> que;
 	for(int i = 1; i <= N; ++i) {
-		cin >> p[i];
+		if(!indeg[i]) que.push(i);
 	}
-	int x;
-	cin >> x;
-	for(int i = 1; i <= N; ++i) {
-		cin >> q[i];
-		tq[q[i]] = i;
-	}
-	int y;
-	cin >> y;
-	set<int> s;
-	for(int i = 1; i <= x - 1; ++i) {
-		s.insert(tq[p[i]]);	
-	}
-	int ans = 0;
-	int yidx = N, k = s.size();
-	for(int i = x; i <= N; ++i) {
-		s.insert(tq[p[i]]);	
-		if(yidx >= tq[p[i]]) ++k;	
-		while(yidx >= y && i + yidx - x - y > k) {
-			if(s.count(yidx)) --k;
-			--yidx;	
+	while(!que.empty()) {
+		int u = que.front();
+		que.pop();
+		for(auto v : graph[u]) {
+			dp[v] = max(dp[u] + 1, dp[v]);
+			if(!(--indeg[v])) que.push(v);
 		}
-		if(yidx < y) break;
-		debug(i), debug(yidx);
-		ans = madd(ans, C(k, i - x));
 	}
-	cout << ans << '\n';
+	int mx = 0;
+	for(int i = 1; i <= N; ++i) {
+		mx = max(mx, dp[i]);
+	}
+	cout << mx << '\n';
 }
 
 int main() {
 	setIO();
 	int T = 1;
-	init();
 	//cin >> T;
 	for(int t = 1; t <= T; ++t) {
 		//cout << "Case " << t << ": ";

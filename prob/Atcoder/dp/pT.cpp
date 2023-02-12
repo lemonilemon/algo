@@ -1,6 +1,5 @@
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
-#define local
 #ifdef local
 using std::cerr;
 #define debug(arg) deone(#arg, arg) 
@@ -28,69 +27,37 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MAXN = 2e5 + 5, MOD = 998244353;
-int p[MAXN], q[MAXN], tq[MAXN];
-int fac[MAXN];
+const int MAXN = 3005, MOD = 1e9 + 7;
 int mabs(ll a) {
 	return (a % MOD + MOD) % MOD;
 }
 int madd(int a, int b) {
 	return mabs(a + b);
 }
-int mmul(int a, int b) {
-	return mabs(1ll * a * b);
-}
-int fastpow(int a, int b) {
-	int ret = 1;
-	while(b) {
-		if(b & 1) ret = mmul(ret, a);
-		a = mmul(a, a);
-		b >>= 1;
-	}
-	return ret;
-}
-int modinv(int a) {
-	return fastpow(a, MOD - 2);
-}
-int C(int n, int m) {
-	return fac[n] * modinv(mmul(fac[m], fac[n - m]));	
-}
-void init() {
-	fac[0] = 1;
-	for(int i = 1; i < MAXN; ++i) {
-		fac[i] = mmul(fac[i - 1], i);
-	}
-}
+int dp[2][MAXN];
 void solve() {
 	int N;
 	cin >> N;
-	for(int i = 1; i <= N; ++i) {
-		cin >> p[i];
-	}
-	int x;
-	cin >> x;
-	for(int i = 1; i <= N; ++i) {
-		cin >> q[i];
-		tq[q[i]] = i;
-	}
-	int y;
-	cin >> y;
-	set<int> s;
-	for(int i = 1; i <= x - 1; ++i) {
-		s.insert(tq[p[i]]);	
-	}
-	int ans = 0;
-	int yidx = N, k = s.size();
-	for(int i = x; i <= N; ++i) {
-		s.insert(tq[p[i]]);	
-		if(yidx >= tq[p[i]]) ++k;	
-		while(yidx >= y && i + yidx - x - y > k) {
-			if(s.count(yidx)) --k;
-			--yidx;	
+	string s;
+	cin >> s;	
+	dp[1][1] = 1;
+	for(int i = 2; i <= N; ++i) {
+		if(s[i - 2] == '>') {
+			for(int j = i; j >= 1; --j) {
+				dp[i & 1][j] = madd(dp[i & 1][j + 1], dp[!(i & 1)][j]);
+			}
+		} else {
+			for(int j = 1; j <= i; ++j) {
+				dp[i & 1][j] = madd(dp[i & 1][j - 1], dp[!(i & 1)][j - 1]);
+			}
 		}
-		if(yidx < y) break;
-		debug(i), debug(yidx);
-		ans = madd(ans, C(k, i - x));
+		for(int j = 1; j <= i; ++j) {
+			debug(i), debug(j), debug(dp[i & 1][j]);
+		}
+	}
+	ll ans = 0;
+	for(int i = 1; i <= N; ++i) {
+		ans = madd(ans, dp[N & 1][i]);
 	}
 	cout << ans << '\n';
 }
@@ -98,7 +65,6 @@ void solve() {
 int main() {
 	setIO();
 	int T = 1;
-	init();
 	//cin >> T;
 	for(int t = 1; t <= T; ++t) {
 		//cout << "Case " << t << ": ";
