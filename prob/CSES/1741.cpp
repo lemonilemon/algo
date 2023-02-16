@@ -37,7 +37,6 @@ struct Node {
 	Node& operator = (const Node& that) {
 		mn = that.mn;
 		mncnt = that.mncnt;
-		addtag = that.addtag;
 		return *this;
 	}
 	Node operator + (const Node& that) const {
@@ -47,15 +46,25 @@ struct Node {
 		ret.mncnt += that.mncnt;
 		return ret;
 	}
+	void tag(int val) {
+		mn += val;
+		addtag += val;
+	}
 } seg[MAXX << 2];
 void pull(int v) {
 	seg[v] = seg[v << 1] + seg[v << 1 | 1];
 }
 void push(int v) {
+	if(seg[v].addtag) {
+		int& addtag = seg[v].addtag;
+		seg[v << 1].tag(addtag);
+		seg[v << 1 | 1].tag(addtag);
+		addtag = 0;	
+	}
 }
 void build(int l = 1, int r = (MAXX << 1) - 1, int v = 1) {
 	if(l == r) {
-		seg[v] = Node()
+		seg[v] = Node();
 		return;
 	}
 	int mid = (l + r) >> 1;
@@ -63,9 +72,33 @@ void build(int l = 1, int r = (MAXX << 1) - 1, int v = 1) {
 	build(mid + 1, r, v << 1 | 1);
 	pull(v);
 }
+void modify(int val, int ql, int qr, int l = 1, int r = (MAXX << 1) - 1, int v = 1) {
+	if(ql == l && qr == r) {
+		seg[v].tag(val);
+		return;
+	}
+	push(v);
+	int mid = (l + r) >> 1;
+	if(qr <= mid) modify(val, ql, qr, l, mid, v << 1);
+	else if(ql > mid) modify(val, ql, qr, mid + 1, r, v << 1 | 1);
+	else {
+		modify(val, ql, mid, l, mid, v << 1);
+		modify(val, mid + 1, qr, mid + 1, r, v << 1 | 1);
+	}
+	pull(v);
+}
+Node query(int ql = 1, int qr = (MAXX << 1) - 1, int l = 1, int r = (MAXX << 1) - 1, int v = 1) {
+	if(ql == l && qr == r) return seg[v];
+	push(v);
+	int mid = (l + r) >> 1;	
+	if(qr <= mid) return query(ql, qr, l, mid, v << 1);
+	if(ql > mid) return query(ql, qr, mid + 1, r, v << 1 | 1); 
+	return query(ql, mid, l, mid, v << 1) + query(mid + 1, qr, mid + 1, r, v << 1 | 1);	
+}
 void solve() {
 	int N;
 	cin >> N;
+	build();
 	for(int i = 0; i < N; ++i) {
 		int x1, y1, x2, y2;
 		cin >> x1 >> y1 >> x2 >> y2;
@@ -73,9 +106,21 @@ void solve() {
 		y1 += MAXY;
 		x2 += MAXX;
 		y2 += MAXY;
-		event[y1].emplace_back(make_pair(make_pair(x1, x2), 1));
-		event[y2 + 1].emplace_back(make_pair(make_pair(x1, x2), -1));
+		debug(x1), debug(x2), debug(y1), debug(y2);
+		event[y1].push_back(make_pair(make_pair(x1, x2), 1));
+		event[y2 + 1].push_back(make_pair(make_pair(x1, x2), -1));
 	}
+	ll ans = 0;
+	/*for(int i = 1; i < (MAXY << 1); ++i) {
+		for(auto [range, val] : event[i]) {
+			auto [l, r] = range;
+			debug(val), debug(l), debug(r);
+			modify(val, l, r);
+		}
+		debug(ans);
+		ans += (MAXX << 1) - 1 - seg[1].mncnt;
+	}*/
+	cout << ans << '\n';
 }
 
 int main() {
