@@ -28,98 +28,105 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MAXX = 1e6 + 5, MAXY = 1e6 + 5;
-vector<pair<pair<int, int>, int> > event[MAXY << 1];
-struct Node {
-	int mn, mncnt, addtag;
-	Node(): mn(0), mncnt(1), addtag(0) {}
-	Node(const Node& that): mn(that.mn), mncnt(that.mncnt), addtag(that.addtag) {}
-	Node& operator = (const Node& that) {
-		mn = that.mn;
-		mncnt = that.mncnt;
-		return *this;
+struct Rec {
+	int x1, y1, x2, y2;
+};
+const int MAXX = 1e6 + 5, MAXY = 1e6 + 5, MAXN = 1e5 + 5, MAXSZ = MAXX << 1;
+struct ST {
+	int sz;
+	struct Node {
+		int mn, mncnt, addtag, sz;
+		Node *lc, *rc;
+		Node(): mn(0), mncnt(1), addtag(0), sz(1), lc(nullptr), rc(nullptr) {}
+		Node(int _sz): mn(0), mncnt(_sz), addtag(0), sz(_sz), lc(nullptr), rc(nullptr) {}
+		Node(const Node& that): mn(that.mn), mncnt(that.mncnt), addtag(0), sz(that.sz), lc(that.lc), rc(that.rc) {}
+		Node& operator = (const Node& that) {
+			mn = that.mn;
+			mncnt = that.mncnt;
+			sz = that.sz;
+			return *this;
+		}
+		Node operator + (const Node& that) const {
+			Node ret;
+			if(mn < that.mn) ret = *this;
+			else if(that.mn < mn) ret = that;
+			else {
+				ret = *this;
+				ret.mncnt += that.mncnt;
+			}
+			ret.sz = sz + that.sz;
+			return ret;
+		}
+		Node* lchild() {
+			return lc? lc : lc = new Node((sz >> 1) + (sz & 1));
+		}
+		Node* rchild() {
+			return rc? rc : rc = new Node(sz >> 1);
+		}	
+		void tag(int val) {
+			mn += val;
+			addtag += val;
+		}
+		void pull() {
+			*this = *lchild() + *rchild();
+		}
+		void push() {
+			if(addtag) {
+				lchild() -> tag(addtag);
+				rchild() -> tag(addtag);
+				addtag = 0;
+			}
+		}
+	} *root;
+	ST(int _sz): sz(_sz), root(new Node(sz)) {}
+	void modify(int val, int ql, int qr) {
+		_modify(val, ql, qr, 1, sz, root);
 	}
-	Node operator + (const Node& that) const {
-		if(mn < that.mn) return *this;
-		if(that.mn < mn) return that;	
-		Node ret = Node(*this);
-		ret.mncnt += that.mncnt;
-		return ret;
+	void _modify(int val, int ql, int qr, int l, int r, Node* node) {
+		if(ql == l && qr == r) {
+			node -> tag(val);
+			return;
+		}
+		node -> push();
+		int mid = (l + r) >> 1;
+		if(qr <= mid) _modify(val, ql, qr, l, mid, node -> lchild());
+		else if(ql > mid) _modify(val, ql, qr, mid + 1, r, node -> rchild());
+		else {
+			_modify(val, ql, mid, l, mid, node -> lchild());
+			_modify(val, mid + 1, qr, mid + 1, r, node -> rchild());
+		}
+		node -> pull();
 	}
-	void tag(int val) {
-		mn += val;
-		addtag += val;
+	int query() {
+		return root -> mncnt;
 	}
-} seg[MAXX << 2];
-void pull(int v) {
-	seg[v] = seg[v << 1] + seg[v << 1 | 1];
-}
-void push(int v) {
-	if(seg[v].addtag) {
-		int& addtag = seg[v].addtag;
-		seg[v << 1].tag(addtag);
-		seg[v << 1 | 1].tag(addtag);
-		addtag = 0;	
-	}
-}
-void build(int l = 1, int r = (MAXX << 1) - 1, int v = 1) {
-	if(l == r) {
-		seg[v] = Node();
-		return;
-	}
-	int mid = (l + r) >> 1;
-	build(l, mid, v << 1);
-	build(mid + 1, r, v << 1 | 1);
-	pull(v);
-}
-void modify(int val, int ql, int qr, int l = 1, int r = (MAXX << 1) - 1, int v = 1) {
-	if(ql == l && qr == r) {
-		seg[v].tag(val);
-		return;
-	}
-	push(v);
-	int mid = (l + r) >> 1;
-	if(qr <= mid) modify(val, ql, qr, l, mid, v << 1);
-	else if(ql > mid) modify(val, ql, qr, mid + 1, r, v << 1 | 1);
-	else {
-		modify(val, ql, mid, l, mid, v << 1);
-		modify(val, mid + 1, qr, mid + 1, r, v << 1 | 1);
-	}
-	pull(v);
-}
-Node query(int ql = 1, int qr = (MAXX << 1) - 1, int l = 1, int r = (MAXX << 1) - 1, int v = 1) {
-	if(ql == l && qr == r) return seg[v];
-	push(v);
-	int mid = (l + r) >> 1;	
-	if(qr <= mid) return query(ql, qr, l, mid, v << 1);
-	if(ql > mid) return query(ql, qr, mid + 1, r, v << 1 | 1); 
-	return query(ql, mid, l, mid, v << 1) + query(mid + 1, qr, mid + 1, r, v << 1 | 1);	
-}
+};
+map<int, vector<pair<pair<int, int>, int> > > event;
 void solve() {
 	int N;
 	cin >> N;
-	build();
-	for(int i = 0; i < N; ++i) {
-		int x1, y1, x2, y2;
+	ST st(MAXSZ);
+	vector<Rec> rec(N);
+	for(auto& [x1, y1, x2, y2] : rec) {
 		cin >> x1 >> y1 >> x2 >> y2;
 		x1 += MAXX;
-		y1 += MAXY;
 		x2 += MAXX;
+		y1 += MAXY;
 		y2 += MAXY;
-		debug(x1), debug(x2), debug(y1), debug(y2);
-		event[y1].push_back(make_pair(make_pair(x1, x2), 1));
-		event[y2 + 1].push_back(make_pair(make_pair(x1, x2), -1));
+		event[y1].push_back(make_pair(make_pair(x1, x2 - 1), 1));
+		event[y2].push_back(make_pair(make_pair(x1, x2 - 1), -1));
 	}
 	ll ans = 0;
-	/*for(int i = 1; i < (MAXY << 1); ++i) {
-		for(auto [range, val] : event[i]) {
+	ll lastval = 0, lastt = 0;
+	for(auto [t, e] : event) {
+		for(auto [range, val] : e) {
 			auto [l, r] = range;
-			debug(val), debug(l), debug(r);
-			modify(val, l, r);
+			st.modify(val, l, r);
 		}
-		debug(ans);
-		ans += (MAXX << 1) - 1 - seg[1].mncnt;
-	}*/
+		ans += (t - lastt) * lastval;
+		lastval = MAXSZ - st.query();
+		lastt = t;
+	}
 	cout << ans << '\n';
 }
 
