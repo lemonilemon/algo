@@ -29,7 +29,7 @@ FILE* setIO(string file = "") {
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
 const int MAXM = 1e5 + 5;
-vector<int> graph[MAXM << 1], stk;
+vector<int> graph[MAXM << 1], scc[MAXM << 1], stk;
 int cond[MAXM << 1], inscc[MAXM << 1], color[MAXM << 1], low[MAXM << 1], t[MAXM << 1];
 bool instk[MAXM << 1];
 int timer, scccnt;
@@ -51,35 +51,20 @@ void tarjan(int u) {
 		++scccnt;
 		while(stk.back() != u) {
 			inscc[stk.back()] = scccnt;
+			scc[scccnt].push_back(stk.back());
 			instk[stk.back()] = 0;
 			stk.pop_back();
 		}
 		inscc[stk.back()] = scccnt;
+		scc[scccnt].push_back(stk.back());
 		instk[stk.back()] = 0;
 		stk.pop_back();
 	}
 }
-vector<int> topo;
 int sccans[MAXM << 1], ans[MAXM];
-void dfs(int u) {
-	color[u] = 1;
-	topo.push_back(u);
-	for(auto v : graph[u]) {
-		if(!color[v]) dfs(v);
-	}
-	color[u] = 2;
-}
 void findscc(int n) {
 	for(int i = 1; i <= n; ++i) {
 		if(!color[i]) tarjan(i);
-	}
-	for(int i = 1; i <= n; ++i) {
-		color[i] = 0;
-	}
-}
-void topo_sort(int n) {
-	for(int i = 1; i <= n; ++i) {
-		if(!color[i]) dfs(i);
 	}
 	for(int i = 1; i <= n; ++i) {
 		color[i] = 0;
@@ -108,11 +93,17 @@ void solve() {
 	for(int i = 1; i <= scccnt; ++i) {
 		sccans[i] = -1;
 	}
-	for(int i = 1; i <= M; ++i) {
-		ans[i] = -1;
+	for(int i = 1; i <= scccnt; ++i) {
+		if(sccans[i] == -1) sccans[i] = 1;
+		for(auto u : scc[i]) {
+			int cur = (u >> 1) + (u & 1);
+			bool pos = !(u & 1);
+			int v = (cur << 1) - 1 + !pos;
+			sccans[inscc[v]] = !sccans[i]; 
+		}
 	}
 	for(int i = 1; i <= M; ++i) {
-		if(ans[i]) cout << '+';
+		if(sccans[inscc[i << 1]]) cout << '+';
 		else cout << '-';
 		cout << " \n"[i == M];
 	}
