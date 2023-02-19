@@ -1,6 +1,5 @@
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
-#define local
 #ifdef local
 using std::cerr;
 #define debug(arg) deone(#arg, arg) 
@@ -28,55 +27,36 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MAXN = 1e5 + 5, MAXM = 2e5 + 5;
-vector<pair<int, int> > graph[MAXN];
-vector<int> ans;
-bool used[MAXM];
-int deg[MAXN], color[MAXN];
-void dfs(int u) {
-	color[u] = 1;
-	for(auto [v, eid] : graph[u]) {
-		if(color[v]) continue;
-		dfs(v);
-	}
-	color[u] = 2;
+const int MAXN = 20, MOD = 1e9 + 7;
+int madd(int a, int b) {
+	return (a + b) % MOD;
 }
-void euler(int u) {
-	while(!graph[u].empty()) {
-		auto [v, eid] = graph[u].back();
-		graph[u].pop_back();
-		if(used[eid]) continue;
-		used[eid] = 1;
-		euler(v);
-	}
-	ans.push_back(u);
+int mmul(int a, int b) {
+	return (1ll * a * b) % MOD;
 }
+vector<int> rgraph[MAXN];
+int dp[MAXN][1 << MAXN];
 void solve() {
 	int n, m;
 	cin >> n >> m;
 	for(int i = 0; i < m; ++i) {
 		int u, v;
 		cin >> u >> v;
-		graph[u].push_back(make_pair(v, i));
-		graph[v].push_back(make_pair(u, i));
-		++deg[u];
-		++deg[v];
+		--u, --v;
+		rgraph[v].push_back(u);
 	}
-	dfs(1);
-	for(int i = 1; i <= n; ++i) {
-		if(color[i] && (deg[i] & 1)) {
-			cout << "IMPOSSIBLE\n";
-			return;
-		}
-		if(!color[i] && deg[i]) {
-			cout << "IMPOSSIBLE\n";
-			return;
+	dp[0][0] = 0;
+	dp[0][1] = 1;
+	for(int j = 2; j < (1 << n); ++j) {
+		for(int i = 0; i < n; ++i) {
+			if(j & (1 << i)) {
+				for(auto u : rgraph[i]) {
+					dp[i][j] = madd(dp[i][j], dp[u][j ^ (1 << i)]);
+				}
+			}
 		}
 	}
-	euler(1);
-	for(int i = 0; i < (int)ans.size(); ++i) {
-		cout << ans[i] << " \n"[i == (int)ans.size() - 1];
-	}
+	cout << dp[n - 1][(1 << n) - 1] << '\n';	
 }
 
 int main() {

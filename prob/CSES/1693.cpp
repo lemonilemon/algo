@@ -30,9 +30,9 @@ FILE* setIO(string file = "") {
 }
 const int MAXN = 1e5 + 5, MAXM = 2e5 + 5;
 vector<pair<int, int> > graph[MAXN];
-vector<int> ans;
 bool used[MAXM];
-int deg[MAXN], color[MAXN];
+int indeg[MAXN], outdeg[MAXN], color[MAXN];
+vector<int> ans;
 void dfs(int u) {
 	color[u] = 1;
 	for(auto [v, eid] : graph[u]) {
@@ -58,22 +58,35 @@ void solve() {
 		int u, v;
 		cin >> u >> v;
 		graph[u].push_back(make_pair(v, i));
-		graph[v].push_back(make_pair(u, i));
-		++deg[u];
-		++deg[v];
+		++indeg[v];
+		++outdeg[u];
 	}
 	dfs(1);
-	for(int i = 1; i <= n; ++i) {
-		if(color[i] && (deg[i] & 1)) {
-			cout << "IMPOSSIBLE\n";
-			return;
-		}
-		if(!color[i] && deg[i]) {
+	if(!color[n]) {
+		cout << "IMPOSSIBLE\n";
+		return;
+	}
+	if(outdeg[1] != indeg[1] + 1) {
+		cout << "IMPOSSIBLE\n";
+		return;
+	}
+	if(indeg[n] != outdeg[n] + 1) {
+		cout << "IMPOSSIBLE\n";
+		return;
+	}
+	for(int i = 2; i < n; ++i) {
+		if(color[i]) {
+			if(indeg[i] != outdeg[i]) {
+				cout << "IMPOSSIBLE\n";
+				return;
+			}
+		} else if(indeg[i] || outdeg[i]) {
 			cout << "IMPOSSIBLE\n";
 			return;
 		}
 	}
 	euler(1);
+	reverse(ans.begin(), ans.end());
 	for(int i = 0; i < (int)ans.size(); ++i) {
 		cout << ans[i] << " \n"[i == (int)ans.size() - 1];
 	}
