@@ -34,7 +34,7 @@ int madd(int a, int b) {
 int mmul(int a, int b) {
 	return (1ll * a * b) % MOD;
 }
-vector<int> rgraph[MAXN];
+int adj[MAXN][MAXN];
 int dp[MAXN][1 << MAXN];
 void solve() {
 	int n, m;
@@ -42,21 +42,33 @@ void solve() {
 	for(int i = 0; i < m; ++i) {
 		int u, v;
 		cin >> u >> v;
-		--u, --v;
-		rgraph[v].push_back(u);
+		u -= 2, v -= 2;
+		if(u == -1) {
+			if(v == -1) continue;
+			++dp[v][1 << v];	
+		}
+		else ++adj[u][v];
 	}
-	dp[0][0] = 0;
-	dp[0][1] = 1;
-	for(int j = 2; j < (1 << n); ++j) {
-		for(int i = 0; i < n; ++i) {
+	for(int j = 0; j < (1 << (n - 2)); ++j) {
+		for(int i = 0; i < n - 2; ++i) {
 			if(j & (1 << i)) {
-				for(auto u : rgraph[i]) {
-					dp[i][j] = madd(dp[i][j], dp[u][j ^ (1 << i)]);
+				for(int k = 0; k < n - 2; ++k) {
+					if((j & (1 << k)) && adj[k][i]) {
+						dp[i][j] = madd(dp[i][j], mmul(adj[k][i], dp[k][j ^ (1 << i)]));
+					}
 				}
 			}
 		}
 	}
-	cout << dp[n - 1][(1 << n) - 1] << '\n';	
+	if(n == 2) {
+		cout << dp[0][1] << '\n';
+		return;
+	}
+	int ans = 0;
+	for(int i = 0; i < n - 2; ++i) {
+		ans = madd(ans, mmul(adj[i][n - 2], dp[i][(1 << (n - 2)) - 1]));
+	}
+	cout << ans << '\n';
 }
 
 int main() {
