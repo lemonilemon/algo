@@ -29,11 +29,10 @@ FILE* setIO(string file = "") {
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
 const int MAXN = 1e5 + 5;
-int color[MAXN], t[MAXN], low[MAXN], inbcc[MAXN];
+int color[MAXN], t[MAXN], low[MAXN];
 int timer;
-bool iscut[MAXN];
 vector<int> stk, graph[MAXN], depth;
-vector<vector<int> > bcc, bccgraph, par;
+vector<vector<int> > bccgraph, par;
 
 void tarjan(int u, int pa = -1) {
 	color[u] = 1;
@@ -46,22 +45,17 @@ void tarjan(int u, int pa = -1) {
 			tarjan(v, u);
 			low[u] = min(low[u], low[v]);
 			if(low[v] >= t[u]) {
-				iscut[u] = 1;
-				bcc.emplace_back();
 				bccgraph.emplace_back();
-				//debug(bcc.size());
-				//debug(bccgraph.size());
-				while(stk.back() != u) {
+				while(stk.back() != v) {
 					bccgraph.back().emplace_back(stk.back());
 					bccgraph[stk.back()].emplace_back(bccgraph.size() - 1);
-					bcc.back().emplace_back(stk.back());
-					inbcc[stk.back()] = bcc.size() - 1;	
 					stk.pop_back();
 				}
+				bccgraph.back().emplace_back(v);
+				bccgraph[v].emplace_back(bccgraph.size() - 1);
+				stk.pop_back();
 				bccgraph.back().emplace_back(u);
 				bccgraph[u].emplace_back(bccgraph.size() - 1);
-				bcc.back().emplace_back(u);
-				inbcc[u] = -1;	
 			}
 		}
 	}
@@ -86,14 +80,14 @@ void findbcc(int n) {
 	for(int i = 0; i < n; ++i) {
 		if(!color[i]) tarjan(i);
 	}
-	par.resize(bccgraph.size());
-	depth.resize(bccgraph.size());
-	dfs();
-	for(int u = 0; u < (int)bccgraph.size(); ++u) {
+	/*for(int u = 0; u < (int)bccgraph.size(); ++u) {
 		for(auto v : bccgraph[u]) {
 			cout << u << ' ' << v << '\n';
 		}
-	}
+	}*/
+	par.resize(bccgraph.size());
+	depth.resize(bccgraph.size());
+	dfs();
 	/*for(int i = 0; i < (int)bcc.size(); ++i) {
 		debug(i);
 		for(auto u : bcc[i]) {
@@ -139,8 +133,8 @@ void solve() {
 		cin >> u >> v >> c;
 		--u, --v, --c;
 		int k = lca(u, v), s1 = lca(u, c), s2 = lca(v, c);
-		/*if((s1 == c && lca(k, s1) == k) || (s2 == c && lca(k, s2) == k)) cout << "NO\n";
-		else cout << "YES\n";*/
+		if((s1 == c && lca(k, s1) == k) || (s2 == c && lca(k, s2) == k)) cout << "NO\n";
+		else cout << "YES\n";
 	}
 }
 
