@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
+#define local
 #ifdef local
 using std::cerr;
 #define debug(arg) deone(#arg, arg) 
@@ -29,13 +30,34 @@ FILE* setIO(string file = "") {
 }
 const int MAXN = 2e5 + 5;
 vector<int> graph[MAXN];
-int sz[MAXN], heavy[MAXN], id[MAXN], top[MAXN], d[MAXN], p[MAXN], timer;
-void dfs(int u, int pa = -1) {
-	sz[u] = 1;
-	heavy[u] = -1;
-	p[u] = pa;
+int seg[MAXN << 2];
+void pull(int v) {
+	seg[v] = max(seg[v << 1], seg[v << 1 | 1]);
+}
+void modify(int q, int val, int l = 1, int r = MAXN, int v = 1) {
+	if(l == r) {
+		seg[v] = val;
+		return;
+	}
+	int mid = (l + r) >> 1;
+	if(q <= mid) modify(q, val, l, mid, v << 1);
+	else modify(q, val, mid + 1, r, v << 1 | 1);
+	pull(v);
+}
+int query(int ql, int qr, int l = 1, int r = MAXN, int v = 1) {
+	if(ql == l && qr == r) return seg[v];
+	int mid = (l + r) >> 1;
+	if(qr <= mid) return query(ql, qr, l, mid, v << 1);
+	if(ql > mid) return query(ql, qr, mid + 1, r, v << 1 | 1);
+	return max(query(ql, mid, l, mid, v << 1), query(mid + 1, qr, mid + 1, r, v << 1 | 1));
+}
+int sz[MAXN], d[MAXN], p[MAXN], heavy[MAXN], val[MAXN], top[MAXN], id[MAXN];
+void dfs(int u = 1, int pa = -1) {
 	if(~pa) d[u] = d[pa] + 1;
 	else d[u] = 0;
+	p[u] = pa;
+	heavy[u] = -1;
+	sz[u] = 1;
 	for(auto v : graph[u]) {
 		if(v == pa) continue;
 		dfs(v, u);
@@ -45,64 +67,62 @@ void dfs(int u, int pa = -1) {
 		} else heavy[u] = v;
 	}
 }
-void hld(int u, int tp) {
+int timer;
+void hld(int u = 1, int tp = 1) {
 	id[u] = ++timer;	
+	modify(id[u], val[u]);
 	top[u] = tp;
 	if(heavy[u] == -1) return;
 	hld(heavy[u], tp);
 	for(auto v : graph[u]) {
 		if(v == p[u] || v == heavy[u]) continue;
-		hld(v, v);
+		hld(v, v);	
 	}
 }
-int BIT[MAXN];
-void modify(int k, int val) {
-	for(; k < MAXN; k += k & -k) BIT[k] += val;
-}
-ll query(int k) {
-	ll ret = 0;
-	for(; k > 0; k -= k & -k) ret += BIT[k];
-	return ret;
-}
-void process(int u, int v) {
+int pathquery(int u, int v) {
+	int ret = 0;
 	int tu = top[u], tv = top[v];
 	while(tu != tv) {
-		if(d[tu] < d[tv]) {
-			swap(tu, tv);	
+		while(d[tu] < d[tv]) {
 			swap(u, v);
+			swap(tu, tv);
 		}
-		debug(tu), debug(u);
-		debug(id[tu]), debug(id[u]);
-		modify(id[tu], 1);
-		modify(id[u] + 1, -1);
+		ret = max(ret, query(id[tu], id[u]));
 		u = p[tu];
 		tu = top[u];
 	}
 	if(d[u] < d[v]) swap(u, v);
-	debug(v), debug(u);
-	debug(id[v]), debug(id[u]);
-	modify(id[v], 1);
-	modify(id[u] + 1, -1);
+	ret = max(ret, query(id[v], id[u]));
+	return ret;
 }
 void solve() {
-	int n, m;
-	cin >> n >> m;
+	int n, q;
+	cin >> n >> q;
+	for(int i = 1; i <= n; ++i) {
+		cin >> val[i];
+	}
 	for(int i = 0; i < n - 1; ++i) {
 		int u, v;
 		cin >> u >> v;
 		graph[u].emplace_back(v);
 		graph[v].emplace_back(u);
 	}
-	dfs(1);
-	hld(1, 1);
-	for(int i = 0; i < m; ++i) {
-		int u, v;
-		cin >> u >> v;
-		process(u, v);
+	dfs();
+	hld();
+	for(int i = 0; i < q; ++i) {
+		int op;
+		cin >> op;
+		if(op == 1) {
+			int s, x;
+			cin >> s >> x;
+			modify(id[s], x);
+		} else {
+			int u, v;
+			cin >> u >> v;
+			cout << pathquery(u, v) << ' ';
+		}
 	}
-	for(int i = 1; i <= n; ++i) {
-		cout << query(id[i]) << '\n';
-	}
+	cout << '\n';
 }
 
 int main() {

@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
+#define local
 #ifdef local
 using std::cerr;
 #define debug(arg) deone(#arg, arg) 
@@ -29,33 +30,8 @@ FILE* setIO(string file = "") {
 }
 const int MAXN = 2e5 + 5;
 vector<int> graph[MAXN];
-int sz[MAXN], heavy[MAXN], id[MAXN], top[MAXN], d[MAXN], p[MAXN], timer;
-void dfs(int u, int pa = -1) {
-	sz[u] = 1;
-	heavy[u] = -1;
-	p[u] = pa;
-	if(~pa) d[u] = d[pa] + 1;
-	else d[u] = 0;
-	for(auto v : graph[u]) {
-		if(v == pa) continue;
-		dfs(v, u);
-		sz[u] += sz[v];
-		if(~heavy[u]) {
-			if(sz[v] > sz[heavy[u]]) heavy[u] = v;
-		} else heavy[u] = v;
-	}
-}
-void hld(int u, int tp) {
-	id[u] = ++timer;	
-	top[u] = tp;
-	if(heavy[u] == -1) return;
-	hld(heavy[u], tp);
-	for(auto v : graph[u]) {
-		if(v == p[u] || v == heavy[u]) continue;
-		hld(v, v);
-	}
-}
-int BIT[MAXN];
+int v[MAXN], tl[MAXN], tr[MAXN], timer;
+ll BIT[MAXN];
 void modify(int k, int val) {
 	for(; k < MAXN; k += k & -k) BIT[k] += val;
 }
@@ -64,29 +40,21 @@ ll query(int k) {
 	for(; k > 0; k -= k & -k) ret += BIT[k];
 	return ret;
 }
-void process(int u, int v) {
-	int tu = top[u], tv = top[v];
-	while(tu != tv) {
-		if(d[tu] < d[tv]) {
-			swap(tu, tv);	
-			swap(u, v);
-		}
-		debug(tu), debug(u);
-		debug(id[tu]), debug(id[u]);
-		modify(id[tu], 1);
-		modify(id[u] + 1, -1);
-		u = p[tu];
-		tu = top[u];
+void dfs(int u, int pa = -1) {
+	tl[u] = ++timer;
+	modify(tl[u], v[u]);
+	for(auto v : graph[u]) {
+		if(v == pa) continue;
+		dfs(v, u);
 	}
-	if(d[u] < d[v]) swap(u, v);
-	debug(v), debug(u);
-	debug(id[v]), debug(id[u]);
-	modify(id[v], 1);
-	modify(id[u] + 1, -1);
+	tr[u] = timer;
 }
 void solve() {
-	int n, m;
-	cin >> n >> m;
+	int n, q;
+	cin >> n >> q;
+	for(int i = 1; i <= n; ++i) {
+		cin >> v[i];
+	}
 	for(int i = 0; i < n - 1; ++i) {
 		int u, v;
 		cin >> u >> v;
@@ -94,14 +62,19 @@ void solve() {
 		graph[v].emplace_back(u);
 	}
 	dfs(1);
-	hld(1, 1);
-	for(int i = 0; i < m; ++i) {
-		int u, v;
-		cin >> u >> v;
-		process(u, v);
-	}
-	for(int i = 1; i <= n; ++i) {
-		cout << query(id[i]) << '\n';
+	for(int i = 0; i < q; ++i) {
+		int op;
+		cin >> op;
+		if(op == 1) {
+			int s, x;
+			cin >> s >> x;
+			int ori = query(tl[s]) - query(tl[s] - 1);
+			modify(tl[s], -ori + x);
+		} else {
+			int s;
+			cin >> s;
+			cout << query(tr[s]) - query(tl[s] - 1) << '\n';
+		}
 	}
 }
 
