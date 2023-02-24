@@ -28,59 +28,37 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-
-const int MAXN = 2e5 + 5;
-vector<int> graph[MAXN];
-int chd[MAXN], sz[MAXN], c[MAXN];
-void dfs_sz(int u = 1, int pa = -1) {
-	sz[u] = 1;
-	chd[u] = -1;
-	for(auto v : graph[u]) {
-		if(v == pa) continue;
-		dfs_sz(v, u);
-		sz[u] += sz[v];
-		if(chd[u] ==  -1 || sz[chd[u]] < sz[v]) {
-			chd[u] = v;
-		}
-	}
-}
-int ans[MAXN];
-void dfs(int u, unordered_set<int>& s, int pa = -1) {
-	if(chd[u] == -1) {
-		s.insert(c[u]);
-		ans[u] = s.size();
-		return;
-	}
-	dfs(chd[u], s, u);
-	for(auto v : graph[u]) {
-		if(v == pa || v == chd[u]) continue;
-		unordered_set<int> temp;
-		dfs(v, temp, u);
-		for(auto color : temp) {
-			s.insert(color);
-		}
-	}
-	s.insert(c[u]);
-	ans[u] = s.size();
-}
+const int MAXN = 5005;
+const ll INF = 1e18 + 9;
+int x[MAXN];
+int K[MAXN][MAXN];
+ll presum[MAXN];
+ll dp[MAXN][MAXN];
 void solve() {
 	int n;
 	cin >> n;
 	for(int i = 1; i <= n; ++i) {
-		cin >> c[i];
+		cin >> x[i];
+		presum[i] = presum[i - 1] + x[i];
 	}
-	for(int i = 0; i < n - 1; ++i) {
-		int u, v;
-		cin >> u >> v;
-		graph[u].emplace_back(v);
-		graph[v].emplace_back(u);
-	}
-	dfs_sz();
-	unordered_set<int> s;
-	dfs(1, s);
 	for(int i = 1; i <= n; ++i) {
-		cout << ans[i] << " \n"[i == n];
+		K[i][i] = i;
 	}
+	for(int len = 2; len <= n; ++len) {
+		for(int i = 1; i + len - 1 <= n; ++i) {
+			int j = i + len - 1;
+			dp[i][j] = INF;
+			K[i][j] = -1;
+			for(int k = K[i][j - 1]; k <= K[i + 1][j]; ++k) {
+				if(dp[i][k] + dp[k + 1][j] < dp[i][j]) {
+					dp[i][j] = dp[i][k] + dp[k + 1][j];
+					K[i][j] = k;
+				}
+			}
+			dp[i][j] += presum[j] - presum[i - 1];
+		}
+	}
+	cout << dp[1][n] << '\n';
 }
 
 int main() {

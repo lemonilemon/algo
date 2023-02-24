@@ -28,58 +28,29 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-
-const int MAXN = 2e5 + 5;
-vector<int> graph[MAXN];
-int chd[MAXN], sz[MAXN], c[MAXN];
-void dfs_sz(int u = 1, int pa = -1) {
-	sz[u] = 1;
-	chd[u] = -1;
-	for(auto v : graph[u]) {
-		if(v == pa) continue;
-		dfs_sz(v, u);
-		sz[u] += sz[v];
-		if(chd[u] ==  -1 || sz[chd[u]] < sz[v]) {
-			chd[u] = v;
-		}
-	}
+const int MOD = 1e9 + 7;
+int mabs(ll a) {
+	return (a % MOD + MOD) % MOD;
 }
-int ans[MAXN];
-void dfs(int u, unordered_set<int>& s, int pa = -1) {
-	if(chd[u] == -1) {
-		s.insert(c[u]);
-		ans[u] = s.size();
-		return;
+int mmul(int a, int b) {
+	return mabs(1ll * a * b);
+}
+int fastpow(int a, int b) {
+	int ret = 1;
+	while(b) {
+		if(b&1) ret = mmul(ret, a);
+		a = mmul(a, a);
+		b >>= 1;
 	}
-	dfs(chd[u], s, u);
-	for(auto v : graph[u]) {
-		if(v == pa || v == chd[u]) continue;
-		unordered_set<int> temp;
-		dfs(v, temp, u);
-		for(auto color : temp) {
-			s.insert(color);
-		}
-	}
-	s.insert(c[u]);
-	ans[u] = s.size();
+	return ret;
 }
 void solve() {
 	int n;
 	cin >> n;
 	for(int i = 1; i <= n; ++i) {
-		cin >> c[i];
-	}
-	for(int i = 0; i < n - 1; ++i) {
-		int u, v;
-		cin >> u >> v;
-		graph[u].emplace_back(v);
-		graph[v].emplace_back(u);
-	}
-	dfs_sz();
-	unordered_set<int> s;
-	dfs(1, s);
-	for(int i = 1; i <= n; ++i) {
-		cout << ans[i] << " \n"[i == n];
+		int a, b;
+		cin >> a >> b;
+		cout << fastpow(a, b) << '\n';
 	}
 }
 
