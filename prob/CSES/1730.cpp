@@ -29,43 +29,23 @@ FILE* setIO(string file = "") {
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
 
-const int MAXN = 1e5 + 5;
-vector<int> graph[MAXN];
-vector<pair<int, int> > bridge;
-int t[MAXN], low[MAXN], color[MAXN], timer;
-void dfs(int u = 1, int pa = -1) {
-	low[u] = t[u] = ++timer;		
-	color[u] = 1;
-	for(auto v : graph[u]) {
-		if(v == pa) continue;
-		if(color[v]) low[u] = min(low[u], t[v]);
-		else {
-			dfs(v, u);
-			low[u] = min(low[u], low[v]);
-		}
-	}
-	if(~pa && low[u] == t[u]) bridge.emplace_back(make_pair(u, pa));
-}
 void solve() {
-	int n, m;
-	cin >> n >> m;
-	for(int i = 0; i < m; ++i) {
-		int u, v;
-		cin >> u >> v;
-		graph[u].emplace_back(v);
-		graph[v].emplace_back(u);
+	int n;
+	cin >> n;
+	int xorsum = 0;
+	for(int i = 0; i < n; ++i) {
+		int x;
+		cin >> x;
+		xorsum ^= x;
 	}
-	dfs();
-	cout << bridge.size() << '\n';
-	for(int i = 0; i < (int)bridge.size(); ++i) {
-		cout << bridge[i].first << ' ' << bridge[i].second << '\n';
-	}
+	if(xorsum) cout << "first\n";
+	else cout << "second\n";
 }
 
 int main() {
 	setIO();
 	int T = 1;
-	//cin >> T;
+	cin >> T;
 	for(int t = 1; t <= T; ++t) {
 		//cout << "Case " << t << ": ";
 		solve();

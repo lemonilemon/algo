@@ -29,37 +29,48 @@ FILE* setIO(string file = "") {
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
 
-const int MAXN = 1e5 + 5;
-vector<int> graph[MAXN];
-vector<pair<int, int> > bridge;
-int t[MAXN], low[MAXN], color[MAXN], timer;
-void dfs(int u = 1, int pa = -1) {
-	low[u] = t[u] = ++timer;		
-	color[u] = 1;
-	for(auto v : graph[u]) {
-		if(v == pa) continue;
-		if(color[v]) low[u] = min(low[u], t[v]);
-		else {
-			dfs(v, u);
-			low[u] = min(low[u], low[v]);
+void solve() {
+	int N, K;
+	cin >> N >> K;
+	string s;
+	cin >> s;
+	int ycnt = 0;
+	for(int i = 0; i < N; ++i) {
+		if(s[i] == 'Y') ++ycnt;	
+	}
+	if(ycnt + K == N) {
+		cout << N - 1 << '\n';
+		return;
+	}
+	if(ycnt + K > N) {
+		for(int i = 0; i < N; ++i) {
+			if(s[i] == 'Y') s[i] = 'X';
+			else s[i] = 'Y';
+		}
+		ycnt = N - ycnt;
+		K = N - K;
+	}
+	if(!ycnt) {
+		cout << max(K - 1, 0) << '\n';
+		return;
+	}
+	int lasty = -1;
+	priority_queue<int, vector<int>, greater<> > pq;
+	for(int i = 0; i < N; ++i) {
+		if(s[i] == 'Y') {
+			if(~lasty) pq.push(i - lasty - 1);	
+			lasty = i;
 		}
 	}
-	if(~pa && low[u] == t[u]) bridge.emplace_back(make_pair(u, pa));
-}
-void solve() {
-	int n, m;
-	cin >> n >> m;
-	for(int i = 0; i < m; ++i) {
-		int u, v;
-		cin >> u >> v;
-		graph[u].emplace_back(v);
-		graph[v].emplace_back(u);
+	int ans = 0;
+	while(!pq.empty() && K >= pq.top()) {
+		int dis = pq.top();
+		pq.pop();
+		ans += dis + 1;	
+		K -= dis;
 	}
-	dfs();
-	cout << bridge.size() << '\n';
-	for(int i = 0; i < (int)bridge.size(); ++i) {
-		cout << bridge[i].first << ' ' << bridge[i].second << '\n';
-	}
+	ans += K;
+	cout << ans << '\n';
 }
 
 int main() {

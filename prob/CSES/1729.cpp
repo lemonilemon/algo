@@ -28,38 +28,27 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-
-const int MAXN = 1e5 + 5;
-vector<int> graph[MAXN];
-vector<pair<int, int> > bridge;
-int t[MAXN], low[MAXN], color[MAXN], timer;
-void dfs(int u = 1, int pa = -1) {
-	low[u] = t[u] = ++timer;		
-	color[u] = 1;
-	for(auto v : graph[u]) {
-		if(v == pa) continue;
-		if(color[v]) low[u] = min(low[u], t[v]);
-		else {
-			dfs(v, u);
-			low[u] = min(low[u], low[v]);
+const int MAXK = 105, MAXN = 1e6 + 5;
+int p[MAXK];
+vector<bool> dp;
+void solve() {
+	int n, k;
+	cin >> n >> k;
+	for(int i = 0; i < k; ++i) {
+		cin >> p[i];
+	}
+	dp.resize(n + 1);
+	dp[0] = 0;
+	for(int i = 1; i <= n; ++i) {
+		for(int j = 0; j < k; ++j) {
+			if(i - p[j] >= 0) dp[i] = (dp[i] || !dp[i - p[j]]);
 		}
 	}
-	if(~pa && low[u] == t[u]) bridge.emplace_back(make_pair(u, pa));
-}
-void solve() {
-	int n, m;
-	cin >> n >> m;
-	for(int i = 0; i < m; ++i) {
-		int u, v;
-		cin >> u >> v;
-		graph[u].emplace_back(v);
-		graph[v].emplace_back(u);
+	for(int i = 1; i <= n; ++i) {
+		if(dp[i]) cout << 'W';
+		else cout << 'L';
 	}
-	dfs();
-	cout << bridge.size() << '\n';
-	for(int i = 0; i < (int)bridge.size(); ++i) {
-		cout << bridge[i].first << ' ' << bridge[i].second << '\n';
-	}
+	cout << '\n';
 }
 
 int main() {

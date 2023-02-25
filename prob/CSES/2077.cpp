@@ -28,23 +28,26 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-
 const int MAXN = 1e5 + 5;
 vector<int> graph[MAXN];
-vector<pair<int, int> > bridge;
-int t[MAXN], low[MAXN], color[MAXN], timer;
+int color[MAXN], t[MAXN], low[MAXN], timer;
+bool iscut[MAXN];
 void dfs(int u = 1, int pa = -1) {
-	low[u] = t[u] = ++timer;		
 	color[u] = 1;
+	t[u] = low[u] = ++timer;
+	int chdcnt = 0;
 	for(auto v : graph[u]) {
 		if(v == pa) continue;
-		if(color[v]) low[u] = min(low[u], t[v]);
+		if(color[v]) low[u] = min(low[u], t[v]);	
 		else {
+			++chdcnt;
 			dfs(v, u);
 			low[u] = min(low[u], low[v]);
+			if(~pa && low[v] >= t[u]) iscut[u] = 1;
 		}
 	}
-	if(~pa && low[u] == t[u]) bridge.emplace_back(make_pair(u, pa));
+	color[u] = 2;
+	if(pa == -1 && chdcnt >= 2) iscut[u] = 1;
 }
 void solve() {
 	int n, m;
@@ -56,9 +59,16 @@ void solve() {
 		graph[v].emplace_back(u);
 	}
 	dfs();
-	cout << bridge.size() << '\n';
-	for(int i = 0; i < (int)bridge.size(); ++i) {
-		cout << bridge[i].first << ' ' << bridge[i].second << '\n';
+	int cnt = 0;
+	for(int i = 1; i <= n; ++i) {
+		if(iscut[i]) ++cnt;
+	}
+	cout << cnt << '\n';
+	for(int i = 1; i <= n; ++i) {
+		if(iscut[i]) {
+			--cnt;
+			cout << i << " \n"[!cnt];
+		}
 	}
 }
 
