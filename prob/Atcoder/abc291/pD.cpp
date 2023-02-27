@@ -28,52 +28,29 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MOD = 1e9 + 7;
-int mabs(ll a, int mod = MOD) {
-	return (a % mod + mod) % mod;
+const int MAXN = 2e5 + 5, MOD = 998244353;
+int mabs(ll a) {
+	return (a % MOD + MOD) % MOD;
 }
-int madd(int a, int b, int mod = MOD) {
-	return mabs(a + b, mod);
+int madd(int a, int b) {
+	return mabs(a + b);
 }
-int mmul(int a, int b, int mod = MOD) {
-	return mabs(1ll * a * b, mod);
-}
-int fastpow(int a, int b, int mod = MOD) {
-	a = mabs(a, mod);
-	int ret = 1;
-	while(b) {
-		if(b & 1) ret = mmul(ret, a, mod);
-		a = mmul(a, a, mod);
-		b >>= 1;
-	}
-	return ret;
-}
-int inv(ll a, int mod = MOD) {
-	a = mabs(a);
-	return fastpow(a, mod - 2);
-}
+
+int dp[MAXN][2];
+int a[MAXN][2];
 void solve() {
-	int n;
-	cin >> n;
-	int ans[3]{};
-	int val = 1;
-	ans[0] = ans[1] = 1;
-	int sqt = 1;
-	bool flag = 1;
-	for(int i = 0; i < n; ++i) {
-		int x, k;
-		cin >> x >> k;
-		ans[0] = mmul(ans[0], k + 1);
-		ans[1] = mmul(ans[1], mmul(fastpow(x, k + 1) - 1, inv(x - 1)));
-		if(k & 1) flag = 0;
-		sqt = mmul(sqt, fastpow(x, k >> 1));
-		val = mmul(val, fastpow(x, k));
+	int N;
+	cin >> N;
+	dp[0][0] = 1;
+	for(int i = 1; i <= N; ++i) {
+		cin >> a[i][0] >> a[i][1];
+		for(int j = 0; j < 2; ++j) {
+			for(int k = 0; k < 2; ++k) {
+				if(a[i][j] != a[i - 1][k]) dp[i][j] = madd(dp[i][j], dp[i - 1][k]);
+			}
+		}
 	}
-	ans[2] = fastpow(val, mmul(cnt, inv(2, MOD - 1), MOD - 1));
-	if(flag) ans[2] = mmul(ans[2], sqt);
-	for(int i = 0; i < 3; ++i) {
-		cout << ans[i] << " \n"[i == 2];
-	}
+	cout << madd(dp[N][0], dp[N][1]) << '\n';
 }
 
 int main() {

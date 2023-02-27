@@ -28,58 +28,24 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MOD = 1e9 + 7;
-int mabs(ll a, int mod = MOD) {
-	return (a % mod + mod) % mod;
-}
-int madd(int a, int b, int mod = MOD) {
-	return mabs(a + b, mod);
-}
-int mmul(int a, int b, int mod = MOD) {
-	return mabs(1ll * a * b, mod);
-}
-int fastpow(int a, int b, int mod = MOD) {
-	a = mabs(a, mod);
-	int ret = 1;
-	while(b) {
-		if(b & 1) ret = mmul(ret, a, mod);
-		a = mmul(a, a, mod);
-		b >>= 1;
-	}
-	return ret;
-}
-int inv(ll a, int mod = MOD) {
-	a = mabs(a);
-	return fastpow(a, mod - 2);
+int josephus(int n, int k, bool even = 1) {
+	int kill = n >> 1;	
+	if(!even) kill += n & 1;
+	if(kill >= k) return (1 + even) + (k - 1) * 2;
+	int leftn = n - kill, leftk = k - kill;
+	int temp = josephus(leftn, leftk, even ^ (n & 1));	
+	return (temp << 1) - even;
 }
 void solve() {
-	int n;
-	cin >> n;
-	int ans[3]{};
-	int val = 1;
-	ans[0] = ans[1] = 1;
-	int sqt = 1;
-	bool flag = 1;
-	for(int i = 0; i < n; ++i) {
-		int x, k;
-		cin >> x >> k;
-		ans[0] = mmul(ans[0], k + 1);
-		ans[1] = mmul(ans[1], mmul(fastpow(x, k + 1) - 1, inv(x - 1)));
-		if(k & 1) flag = 0;
-		sqt = mmul(sqt, fastpow(x, k >> 1));
-		val = mmul(val, fastpow(x, k));
-	}
-	ans[2] = fastpow(val, mmul(cnt, inv(2, MOD - 1), MOD - 1));
-	if(flag) ans[2] = mmul(ans[2], sqt);
-	for(int i = 0; i < 3; ++i) {
-		cout << ans[i] << " \n"[i == 2];
-	}
+	int n, k;
+	cin >> n >> k;
+	cout << josephus(n, k) << '\n';
 }
 
 int main() {
 	setIO();
 	int T = 1;
-	//cin >> T;
+	cin >> T;
 	for(int t = 1; t <= T; ++t) {
 		//cout << "Case " << t << ": ";
 		solve();

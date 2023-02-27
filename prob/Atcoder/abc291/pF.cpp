@@ -28,51 +28,48 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MOD = 1e9 + 7;
-int mabs(ll a, int mod = MOD) {
-	return (a % mod + mod) % mod;
-}
-int madd(int a, int b, int mod = MOD) {
-	return mabs(a + b, mod);
-}
-int mmul(int a, int b, int mod = MOD) {
-	return mabs(1ll * a * b, mod);
-}
-int fastpow(int a, int b, int mod = MOD) {
-	a = mabs(a, mod);
-	int ret = 1;
-	while(b) {
-		if(b & 1) ret = mmul(ret, a, mod);
-		a = mmul(a, a, mod);
-		b >>= 1;
-	}
-	return ret;
-}
-int inv(ll a, int mod = MOD) {
-	a = mabs(a);
-	return fastpow(a, mod - 2);
-}
+const int MAXN = 1e5 + 5, MAXM = 11, INF = 1e9 + 7;
+int dp[MAXN], rdp[MAXN];
+bool adj[MAXN][MAXM];
 void solve() {
-	int n;
-	cin >> n;
-	int ans[3]{};
-	int val = 1;
-	ans[0] = ans[1] = 1;
-	int sqt = 1;
-	bool flag = 1;
-	for(int i = 0; i < n; ++i) {
-		int x, k;
-		cin >> x >> k;
-		ans[0] = mmul(ans[0], k + 1);
-		ans[1] = mmul(ans[1], mmul(fastpow(x, k + 1) - 1, inv(x - 1)));
-		if(k & 1) flag = 0;
-		sqt = mmul(sqt, fastpow(x, k >> 1));
-		val = mmul(val, fastpow(x, k));
+	int N, M;
+	cin >> N >> M;
+	for(int i = 1; i <= N; ++i) {
+		for(int j = 1; j <= M; ++j) {
+			char ch;
+			cin >> ch;
+			adj[i][j] = ch == '1';
+		}
 	}
-	ans[2] = fastpow(val, mmul(cnt, inv(2, MOD - 1), MOD - 1));
-	if(flag) ans[2] = mmul(ans[2], sqt);
-	for(int i = 0; i < 3; ++i) {
-		cout << ans[i] << " \n"[i == 2];
+	dp[1] = 0;
+	for(int i = 2; i <= N; ++i) {
+		dp[i] = INF;
+	}
+	for(int i = 1; i <= N; ++i) {
+		for(int j = 1; j <= M; ++j) {
+			if(adj[i][j]) dp[i + j] = min(dp[i + j], dp[i] + 1);
+		}
+	}
+	rdp[N] = 0;
+	for(int i = 1; i < N; ++i) {
+		rdp[i] = INF;
+	}
+	for(int i = N; i >= 1; --i) {
+		for(int j = 1; j <= M && i - j >= 1; ++j) {
+			if(adj[i - j][j]) rdp[i - j] = min(rdp[i - j], rdp[i] + 1);
+		}
+	}
+	for(int i = 2; i < N; ++i) {
+		int ans = INF;
+		for(int j = max(i - M + 1, 1); j < i; ++j) {
+			for(int k = 1; k <= M; ++k) {
+				if(j + k <= i) continue;
+				if(adj[j][k]) ans = min(ans, dp[j] + rdp[j + k] + 1);
+			}
+		}
+		if(ans == INF) cout << "-1";
+		else cout << ans;
+		cout << " \n"[i == N - 1];
 	}
 }
 

@@ -28,52 +28,40 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MOD = 1e9 + 7;
-int mabs(ll a, int mod = MOD) {
-	return (a % mod + mod) % mod;
-}
-int madd(int a, int b, int mod = MOD) {
-	return mabs(a + b, mod);
-}
-int mmul(int a, int b, int mod = MOD) {
-	return mabs(1ll * a * b, mod);
-}
-int fastpow(int a, int b, int mod = MOD) {
-	a = mabs(a, mod);
-	int ret = 1;
-	while(b) {
-		if(b & 1) ret = mmul(ret, a, mod);
-		a = mmul(a, a, mod);
-		b >>= 1;
+const int MAXN = 2e5 + 5;
+ll dp[MAXN];
+ll s[MAXN], f[MAXN];
+struct Line {
+	ll m, k;
+	Line(): m(0), k(0) {}
+	Line(ll _m, ll _k): m(_m), k(_k) {}
+	ll operator () (ll x) const {
+		return m * x + k;
 	}
-	return ret;
-}
-int inv(ll a, int mod = MOD) {
-	a = mabs(a);
-	return fastpow(a, mod - 2);
+};
+bool check(Line l1, Line l2, Line l3) { // if kill l2
+	return (l3.k - l1.k) * (l1.m - l2.m) <= (l2.k - l1.k) * (l1.m - l3.m);
 }
 void solve() {
 	int n;
-	cin >> n;
-	int ans[3]{};
-	int val = 1;
-	ans[0] = ans[1] = 1;
-	int sqt = 1;
-	bool flag = 1;
-	for(int i = 0; i < n; ++i) {
-		int x, k;
-		cin >> x >> k;
-		ans[0] = mmul(ans[0], k + 1);
-		ans[1] = mmul(ans[1], mmul(fastpow(x, k + 1) - 1, inv(x - 1)));
-		if(k & 1) flag = 0;
-		sqt = mmul(sqt, fastpow(x, k >> 1));
-		val = mmul(val, fastpow(x, k));
+	cin >> n >> f[0];
+	for(int i = 1; i <= n; ++i) {
+		cin >> s[i];
 	}
-	ans[2] = fastpow(val, mmul(cnt, inv(2, MOD - 1), MOD - 1));
-	if(flag) ans[2] = mmul(ans[2], sqt);
-	for(int i = 0; i < 3; ++i) {
-		cout << ans[i] << " \n"[i == 2];
+	for(int i = 1; i <= n; ++i) {
+		cin >> f[i];
 	}
+	deque<Line> dq;
+	dp[0] = 0;
+	dq.push_back(Line(f[0], dp[0]));
+	for(int i = 1; i <= n; ++i) {
+		while(dq.size() >= 2 && dq[1](s[i]) <= dq[0](s[i])) dq.pop_front();		
+		dp[i] = dq.front()(s[i]);
+		Line line(f[i], dp[i]);
+		while(dq.size() >= 2 && check(dq[(int)dq.size() - 2], dq.back(), line)) dq.pop_back();
+		dq.push_back(line);
+	}
+	cout << dp[n] << '\n';
 }
 
 int main() {

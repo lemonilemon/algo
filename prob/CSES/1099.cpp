@@ -29,18 +29,21 @@ FILE* setIO(string file = "") {
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
 const int MAXX = 7;
-int sg[MAXX][(MAXX << 1)];
+int sg[MAXX + 1][(MAXX << 1) + 1]; // i -> j
 void test() {
-	for(int i = 0; i < (MAXX << 1); ++i) {
+	for(int i = 0; i <= (MAXX << 1); ++i) {
 		sg[0][i] = i;
 	}
-	for(int i = 1; i < MAXX; ++i) {
-		for(int j = 0; i + j < (MAXX << 1); ++j) {
+	for(int i = 1; i <= MAXX; ++i) {
+		for(int j = 0; i + j <= (MAXX << 1); ++j) {
 			set<int> s;
 			for(int k = 1; k <= i; ++k) {
-				s.insert(sg[i - k][j + k]);
+				s.insert(sg[i - k][j + k]);	
 			}
-			for(int k = 0; k <= (MAXX << 1); ++k) {
+			for(int k = 1; k <= j; ++k) {
+				s.insert(sg[i][j - k]);
+			}
+			for(int k = 0; k <= MAXX << 1; ++k) {
 				if(!s.count(k)) {
 					sg[i][j] = k;
 					break;
@@ -74,11 +77,11 @@ void solve() {
 int main() {
 	setIO();
 	int T = 1;
-	cin >> T;
-	//test();
+	//cin >> T;
+	test();
 	for(int t = 1; t <= T; ++t) {
 		//cout << "Case " << t << ": ";
-		solve();
+		//solve();
 	}
 }
 
