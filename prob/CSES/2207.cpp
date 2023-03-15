@@ -28,27 +28,38 @@ FILE* setIO(string file = "") {
 	if(freopen((file + ".in").c_str(), "r", stdin) == NULL) return NULL; 
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
-const int MAXN = 100;
+const int MAXN = 2000;
 int sg[MAXN];
-void solve() {
+void init() {
 	sg[1] = 0, sg[2] = 0;
 	for(int i = 3; i < MAXN; ++i) {
 		set<int> s;
-		for(int j = 1; (j << 1) < i; ++j) {
+		for(int j = 1; j < (i >> 1) + (i & 1); ++j) {
 			s.insert(sg[j] ^ sg[i - j]);
 		}
 		sg[i] = 0;
 		while(s.count(sg[i])) ++sg[i];
 	}
-	for(int i = 1; i < MAXN; ++i) {
-		debug(i), debug(sg[i]);
+	/*for(int i = 1; i < MAXN; ++i) {
+		if(!sg[i]) debug(i);
+	}*/
+}
+void solve() {
+	int n;
+	cin >> n;
+	if(n < MAXN) {
+		if(sg[n]) cout << "first\n";
+		else cout << "second\n";
+		return;
 	}
+	cout << "first\n";
 }
 
 int main() {
 	setIO();
+	init();
 	int T = 1;
-	//cin >> T;
+	cin >> T;
 	for(int t = 1; t <= T; ++t) {
 		//cout << "Case " << t << ": ";
 		solve();
