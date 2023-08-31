@@ -56,9 +56,10 @@ struct Trie {
             ++nxt[bit]->cnt;
             nxt[bit] -> insert(k);
         }
-        ll query(int k) { // (sum of first same bit * cnt, sum of cnt)
-            bool bit = k & (1 << dec);
-            
+        ll query(int k) { // sum of first same bit * cnt
+            bool bit = k & (1 << (dec - 1));
+            if(!nxt[bit]) return 0;
+            ll ret = 0; 
         }
     } *root = new Node(30);
     void insert(int k) {
