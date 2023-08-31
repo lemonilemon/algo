@@ -1,0 +1,95 @@
+/* 
+ * Created : 2023-08-31 22:47:52 lemonilemon
+ * Time complexity : O()
+ * Space complexity : O()
+ * Description : 
+ */
+
+#include <bits/stdc++.h>
+#pragma GCC optimize("Ofast")
+using namespace std;
+using ll = long long int;
+
+
+#define LOCAL
+
+// debug template
+#ifdef LOCAL
+#define debug(args...) _debug(#args, args)
+#define expand(arr, l, r) _expand(#arr, l, r, begin(arr) + l, begin(arr) + r)
+#define safe()  cerr << "\e[1;32m" << __PRETTY_FUNCTION__ << " at line " << __LINE__ << " is safe.\e[0m\n";
+template <typename ...T> void _debug(const char *s, T ...args) {
+    int cnt = sizeof...(T);
+    ((cerr << "\033[1;32m(" << s << ") = ("), ...,
+        (cerr << args << (--cnt ? ", " : ")\033[0m\n")));
+}
+template <typename T> void _expand(const char *s, int nl, int nr, T l, T r) {
+    cerr << "\033[1;32mexpand " << s << " from " << s << '[' << nl << "] to " << s << '[' << nr << "].\n---\n[";
+    for(T it = l; it != r + 1; ++it) {
+       cerr << *it << (it != r? ", " : "]\n---\033[0m\n");
+    }
+}
+#else
+#define debug(...) ((void)0) 
+#define safe() ((void)0) 
+#endif
+
+// constants
+
+
+
+// solution
+void solve() {
+    string a, b;
+    cin >> a >> b;
+    for(int t = 0; t < 2; ++t) {
+        vector<int> stka, stkb;
+        for(int i = 0; i < a.size(); ++i) {
+            if(a[i] == '0') {
+                if(!stka.empty() && stka.back() == i - 1) stka.pop_back();
+                stka.push_back(i);
+            }
+        }
+        for(int i = 0; i < b.size(); ++i) {
+            if(b[i] == '0') {
+                if(!stkb.empty() && stkb.back() == i - 1) stkb.pop_back();
+                stkb.push_back(i);
+            }
+        }
+        set<int> s;
+        for(auto p : stka) {
+            s.insert(p);
+        }
+        for(auto p : stkb) {
+            if(s.count(p)) {
+                cout << "YES\n";
+                return;
+            }
+        }
+        reverse(a.begin(), a.end());
+        reverse(b.begin(), b.end());
+        for(auto& p : a) {
+            if(p == '0') p = '1';
+            else p = '0';
+        }
+        for(auto& p : b) {
+            if(p == '0') p = '1';
+            else p = '0';
+        }
+    }
+    cout << "NO\n";
+}
+
+// main
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int T = 1;
+    cin >> T;
+    for(int t = 1; t <= T; ++t) {
+        // cout << "Case #" << t << ":\n";
+        solve();
+    }
+    return 0;
+}
+
