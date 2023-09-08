@@ -10,7 +10,11 @@ int main() {
             continue;
         }
         if(k <= m - c + 1) {
-            
+            printf("%d %d", r, c + k - 1);
+            break;
         }
+        k -= m - c + 1;
+        printf("%d %d", r + k, c);
+        break;
     }
 }
