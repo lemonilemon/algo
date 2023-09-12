@@ -95,13 +95,13 @@ int rooted_iso(int r) {
         for(int i = 0, cnt = 0; i < (int)d2v[d].size(); ++i) {
             if(i && subtree_tags[d2v[d][i]] != subtree_tags[d2v[d][i - 1]]) ++cnt;
             tag[d2v[d][i]] = cnt;
+            // debug(d, d2v[d][i], tag[d2v[d][i]]);
         }
         for(auto u : d2v[d]) {
             if(~p[u]) {
-                if(subtree_tags[p[u]].count(tag[u])) {
-                    ++subtree_tags[p[u]][tag[u]];
-                    dp[p[u]] = mmul(dp[p[u]], mmul(dp[u], subtree_tags[p[u]][tag[u]]));
-                } else subtree_tags[p[u]][tag[u]] = 1;
+                if(subtree_tags[p[u]].count(tag[u])) ++subtree_tags[p[u]][tag[u]];
+                else subtree_tags[p[u]][tag[u]] = 1;
+                dp[p[u]] = mmul(dp[p[u]], mmul(dp[u], subtree_tags[p[u]][tag[u]]));
             }
         }
     }
