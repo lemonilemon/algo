@@ -38,9 +38,9 @@ template <typename T> void _expand(const char *s, int nl, int nr, T l, T r) {
 // constants
 const int MAXN = 1e5 + 5;
 const int MOD = 998244353;
-vector<int> cen, d2v[MAXN], graph[MAXN]; 
-map<int, int> subtree_tags[MAXN];
-int tag[MAXN], sz[MAXN], p[MAXN], dp[MAXN];
+vector<int> cen, d2v[MAXN << 1], graph[MAXN << 1]; 
+map<int, int> subtree_tags[MAXN << 1];
+int tag[MAXN << 1], sz[MAXN << 1], p[MAXN << 1], dp[MAXN << 1];
 int n;
 int mabs(ll a) {
     return (a % MOD + MOD) % MOD;
@@ -61,13 +61,13 @@ void dfs_sz(int u = 1, int pa = -1) {
     return;
 }
 void dfs_cen(int u = 1, int pa = -1) {
-    int mxsub = n - sz[u];
+    int mxsub = (n << 1) - 1 - sz[u];
     for(auto v : graph[u]) {
         if(v == pa) continue;
         dfs_cen(v, u);
         mxsub = max(mxsub, sz[v]);
     }
-    if((mxsub << 1) <= n) cen.push_back(u);
+    if((mxsub << 1) <= (n << 1) - 1) cen.push_back(u);
     return;
 }
 int dfs_height(int u, int pa = -1, int depth = 0) {
@@ -81,7 +81,7 @@ int dfs_height(int u, int pa = -1, int depth = 0) {
     return ++h;
 }
 int rooted_iso(int r) {
-    for(int i = 0; i <= n; ++i) {
+    for(int i = 0; i <= (n << 1) - 1; ++i) {
         d2v[i].clear();
         subtree_tags[i].clear();
         tag[i] = 0;
@@ -111,15 +111,22 @@ int rooted_iso(int r) {
 void solve() {
     // init    
     cin >> n;
+    int cnt = n + 1;
     for(int i = 0; i < n - 1; ++i) {
         int u, v;
         cin >> u >> v;
-        graph[u].push_back(v);
-        graph[v].push_back(u);
+        graph[u].push_back(n + i + 1);
+        graph[n + i + 1].push_back(v);
+        graph[v].push_back(n + i + 1);
+        graph[n + i + 1].push_back(u);
     }
-    for(int i = 1; i <= n; ++i) {
-        debug(i, rooted_iso(i));
-    }
+    dfs_sz();
+    dfs_cen();
+    /* for(auto c : cen) {
+        debug(c);
+    } */
+    assert(cen.size() == 1);
+    cout << rooted_iso(cen.back()) << '\n';
 }
 
 // main

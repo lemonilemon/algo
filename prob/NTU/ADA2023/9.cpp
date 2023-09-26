@@ -11,7 +11,7 @@ using namespace std;
 using ll = long long int;
 
 
-#define LOCAL
+// #define LOCAL
 
 // debug template
 #ifdef LOCAL
@@ -38,24 +38,71 @@ template <typename T> void _expand(const char *s, int nl, int nr, T l, T r) {
 // constants
 
 const int MAXN = 1505, MAXM = 1505;
+const ll INF = 1e18 + 7;
 ll a[MAXN][MAXM];
-ll presum[MAXN][MAXM];
+ll dp[MAXN];
+ll sufsum[MAXN][MAXM];
 // solution
 void solve() {
     int n, m;
     cin >> n >> m;
     for(int i = 1; i <= n; ++i) {
         for(int j = 1; j <= m; ++j) {
-            cin >> a[n - i + 1][m - j + 1];
+            cin >> a[n - i + 1][j];
+            a[n - i + 1][j] *= -1;
         }
     }
+    /*for(int i = 1; i <= n; ++i) {
+        cerr << "> ";
+        for(int j = 1; j <= m; ++j) {
+            cerr << a[i][j] << ' ';
+        }
+        cerr << '\n';
+    }*/
     int k;
     cin >> k;
     for(int i = 0; i < k; ++i) {
-        int x, y;
-        cin >> x >> y;
-        
+        int x, y, d, r;
+        cin >> x >> y >> d >> r;      
+        int ul = x - d, lr = y - d;
+        a[n - ul + 1][lr] += r;
     }
+    /*for(int i = 1; i <= n; ++i) {
+        cerr << "> ";
+        for(int j = 1; j <= m; ++j) {
+            cerr << a[i][j] << ' ';
+        }
+        cerr << '\n';
+    }*/
+    for(int i = 1; i <= n; ++i) {
+        for(int j = m; j > 0; --j) {
+            sufsum[i][j] = sufsum[i - 1][j] + sufsum[i][j + 1] - sufsum[i - 1][j + 1] + a[i][j];
+        }
+    }
+    /*cerr << ">>\n";
+    for(int i = 1; i <= n; ++i) {
+        cerr << "> ";
+        for(int j = 1; j <= m; ++j) {
+            cerr << sufsum[i][j] << ' ';
+        }
+        cerr << '\n';
+    }*/
+    for(int i = 1; i <= n; ++i) {
+        dp[i] = -INF;
+    }
+    for(int j = 1; j <= m; ++j) {
+        ll mx = 0;
+        for(int i = 1; i <= n; ++i) {
+            mx = max(dp[i] - sufsum[i][j], mx);
+            dp[i] = max(sufsum[i][j] + mx, dp[i]);
+            debug(i, j, dp[i]);
+        }
+    }
+    ll mx = 0;
+    for(int i = 1; i <= n; ++i) {
+        mx = max(mx, dp[i]);
+    }
+    cout << mx << '\n';
 }
 
 // main
