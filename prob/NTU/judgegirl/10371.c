@@ -6,6 +6,7 @@
 void dividePolynomial(int f[], int g[]) {
     int n = f[0], m = g[0];
     int tmp[MAX];
+    f[0] = f[n + 1];
     for(int i = 0; i <= n; ++i) {
         tmp[i] = f[n - i + 1];
     }
@@ -18,38 +19,29 @@ void dividePolynomial(int f[], int g[]) {
     for(int i = 0; i <= m; ++i) {
         g[i] = tmp[i];
     }
-    int q[MAX], r[MAX];   
-    /* printf("> ");
-    for(int i = 0; i <= n; ++i) {
-        printf("%d ", f[i]);
-    }
-    printf("\n"); */
+    int q[MAX] = {0}, r[MAX] = {0};
+    int dis = n - m;
     while(n >= m) {
         int d = n - m;
-        // printf("> %d\n", d);
         q[d] = f[n] / g[m];
+        // printf("> %d %d\n", d, q[d]);
         for(int i = 0; i <= m; ++i) {
             f[d + i] -= q[d] * g[i];
         }
-        while(--n) {
-            if(f[n]) break;
-        }
-        /* printf("> ");
-        for(int i = 0; i <= n; ++i) {
-            printf("%d ", f[i]);
-        }
-        printf("\n"); */
+        while(n >= 0 && !(f[n])) --n;
     }
-    if(n < 0) n = 0;
-    r[0] = n;
-    for(int i = 0; i <= n; ++i) {
-        r[i + 1] = f[n - i];
-    } 
-    for(int i = 0; i < MAX - 1; ++i) {
-        f[i] = 0;
-        if(q[i]) f[0] = i;
-        g[i] = r[i];
+    g[0] = n;
+    (g[0] < 0) && (g[0] = 0);
+    for(int i = 0; i <= g[0]; ++i) {
+        g[i + 1] = f[g[0] - i];
     }
+    /* printf(">");
+    for(int i = 0; i <= dis; ++i) {
+        printf(" %d", q[i]);
+    }
+    printf("\n"); */
+    f[0] = dis;
+    (f[0] < 0) && (f[0] = 0);
     for(int i = 0; i <= f[0]; ++i) {
         f[i + 1] = q[f[0] - i];
     }
