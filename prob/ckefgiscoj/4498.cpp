@@ -3,5 +3,5 @@ using namespace std;
 int main() {
 	string s;
 	cin >> s;
-	cout << "1999\n" << s << '\n';
+	cout << "1558\n" << s << '\n';
 }
