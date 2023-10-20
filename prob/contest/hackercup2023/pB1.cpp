@@ -74,7 +74,7 @@ void solve() {
             sum += p;
         }
     }
-    if(sum > 41) {
+    if(a > 1 || sum > 41) {
         cout << "-1\n";
         return;
     }
