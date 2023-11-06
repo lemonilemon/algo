@@ -38,42 +38,85 @@ template <typename T> void _expand(const char *s, int nl, int nr, T l, T r) {
 // constants
 const int MAXN = 2e5 + 5;
 int x[MAXN];
-vector<int> pos[MAXN];
-int BIT[MAXN];
-void modify(int k) {
-    for(; k < MAXN; k += k & -k) ++BIT[k];
-}
-int query(int k) {
-    int ret = 0;
-    for(; k > 0; k ^= k & -k) ret += BIT[k];
-    return ret;
-}
+int cnt[MAXN];
 bool color[MAXN];
+vector<int> ans;
+struct Node {
+    int mn, mnid;
+    Node() {};
+    Node(int k, int id): mn(k), mnid(id) {};
+    Node(const Node& that): mn(that.mn), mnid(that.mnid) {};
+    Node operator + (const Node& that) const {
+        Node ret;
+        if(mn < that.mn) {
+            ret.mn = mn;
+            ret.mnid = mnid;
+        } else if(mn > that.mn) {
+            ret.mn = that.mn;
+            ret.mnid = that.mnid;
+        } else {
+            ret.mn = mn;
+            ret.mnid = min(mnid, that.mnid);
+        }
+        return ret;
+    }
+} seg[MAXN << 2];
+int n, k;
+void pull(int v) {
+    seg[v] = seg[v << 1] + seg[v << 1 | 1];
+}
+void build(int l = 1, int r = n, int v = 1) {
+    if(l == r) {
+        seg[v] = Node(x[l], l);
+        return;
+    }
+    int mid = (l + r) >> 1;
+    build(l, mid);
+    build(mid + 1, r);
+    pull(v);
+}
+Node query(int ql, int qr, int l = 1, int r = n, int v = 1) {
+    if(ql == l && qr == r) return seg[v];
+    int mid = (l + r) >> 1;
+    if(qr <= mid) return query(ql, qr, l, mid, v << 1);
+    if(ql > mid) return query(ql, qr, mid + 1, r, v << 1 | 1);
+    return query(ql, mid, l, mid, v << 1) + query(mid + 1, qr, mid + 1, qr, v << 1 | 1); 
+}
 // solution
 void solve() {
-    int n, k;
     cin >> n >> k;
     for(int i = 1; i <= n; ++i) {
         cin >> x[i];
-        pos[x[i]].push_back(i);
+        ++cnt[x[i]];
     }
-    for(int i = 1; i <= k; ++i) {
-        int j = pos[i].size() - 1;
-        int mxval = query(pos[i][j]);
-        while(j && query(pos[i][j - 1]) == mxval) --j;
-
-        color[pos[i][j]] = 1;
-        modify(pos[i][j]);
-    }
-    bool begin = 1;
-    for(int i = 1; i <= n; ++i) {
-        if(color[i]) {
-            if(begin) begin = 0;
-            else cout << ' ';
-            cout << x[i];
+    deque<int> dq;
+    for(int i = 1; i <= n; ++i) { 
+        --cnt[x[i]];
+        if(color[x[i]]) continue;
+        while(!dq.empty() && x[i] < dq.back()) {
+            int k = dq.back();
+            if(!cnt[k]) {
+                while(!dq.empty()) {
+                    int cur = dq.front();
+                    dq.pop_front();
+                    ans.push_back(cur);
+                }
+                break;
+            }
+            color[k] = 0;
+            dq.pop_back();
         }
+        dq.push_back(x[i]);
+        color[x[i]] = 1;
     }
-    cout << '\n';
+    while(!dq.empty()) {
+        int cur = dq.front();
+        dq.pop_front();
+        ans.push_back(cur);
+    }
+    for(int i = 0; i < k; ++i) {
+        cout << ans[i] << " \n"[i == k - 1];
+    }
 }
 
 // main
