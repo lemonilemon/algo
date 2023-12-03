@@ -7,28 +7,27 @@ int mx;
 bool color[1005];
 int k, n, sz;
 bool flag;
-void dfs(int layer, int cur, int pathcnt) {
+void dfs1(int layer, int cur, int layerpath, int pathcnt) {
+    if(pathcnt < mx) return;
     if(layer == k) {
-        flag = 1;
-    }
-    if(cur == pathcnt)
-    for(int i = 0; i < pathcnt; ++i) {
-        int u = chosen[i][layer - 1];
-        for(int v = (layer + 1) * sz; v < (layer + 2) * sz; ++v) {
-            if(!color[v] && adj[u][v]) {
-                color[v] = 1;
-                chosen[i][layer + 1] = v;
+        mx = pathcnt; 
+        for(int i = 0; i < pathcnt; ++i) {
+            for(int j = 0; j < k; ++j) {
+                anschosen[i][j] = chosen[i][j];
             }
         }
-    }
-    int pcnt = 0;
-    dfs(layer + 1);
-}
-void dfs1(int path, int u) {
-    if(u / sz == k - 1) {
         return;
     }
+    if(cur == pathcnt) {
+        dfs(layer + 1, 0, pathcnt, pathcnt);
+        return;
+    }
+    int u = chosen[cur][layer - 1];
+    for(int v = (u / sz + 1) * sz; v < (u / sz + 2) * sz; ++v) {
+        
+    }
 }
+void dfs2(int 
 int main() {
     scanf("%d%d", &k, &n);
     sz = n / k;
