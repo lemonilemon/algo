@@ -45,35 +45,29 @@ int a[MAXM];
 void solve() {
     int n, m, c; 
     cin >> n >> m >> c;
+    --n;
     ll sum = 0;
     for(int i = 1; i <= m; ++i) {
         cin >> a[i];
         sum += a[i];
     }
+    --a[c];
+    --sum;
     int A = sum - a[c];
     int B = a[c];
-    if(n > sum || n == 1 || B == 1) {
+    if(n > sum) {
         cout << -1 << '\n';
         return;
     }
-    if(n > A + 1) {
+    double ans = 1;
+    if(n > A) {
         cout << 1 << '\n';
         return;
     }
-    double ans = 1;
-    if(n - 1 == A) {
-        
-    } else {
-        double mul = 1 + (double) n / (A - n + 1);
-        if(n != A + 1) ++mul;
-        for(int i = 1; i <= B; ++i) {
-            mul *= (double)(A + i - n)/(A + i);
-        }
-        ans -= mul;
+    for(int i = 1; i <= B; ++i) {
+        ans *= (double)(A - n + i) / (A + i);
     }
-
-    ans *= (double)(A + B) / n;
-    
+    ans = 1 - ans;
     cout << fixed << setprecision(8) << ans << '\n';
 }
 
@@ -89,3 +83,4 @@ int main() {
     }
     return 0;
 }
+
