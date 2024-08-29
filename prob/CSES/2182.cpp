@@ -29,6 +29,8 @@ FILE* setIO(string file = "") {
 	return freopen((file + ".out").c_str(), "w", stdout);
 }
 const int MOD = 1e9 + 7;
+const int MAXN = 1e5 + 5;
+int x[MAXN], k[MAXN];
 int mabs(ll a, int mod = MOD) {
 	return (a % mod + mod) % mod;
 }
@@ -52,25 +54,46 @@ int inv(ll a, int mod = MOD) {
 	a = mabs(a);
 	return fastpow(a, mod - 2);
 }
+int seg[MAXN << 2];
+void pull(int v) {
+    seg[v] = mmul(seg[v << 1], seg[v << 1 | 1], MOD - 1);
+}
+void build(int l, int r, int v) {
+    if(l == r) {
+        seg[v] = mabs(k[l] + 1, MOD - 1);
+        return;
+    }
+    int mid = (l + r) >> 1;
+    build(l, mid, v << 1);
+    build(mid + 1, r, v << 1 | 1);
+    pull(v);
+}
+int query(int ql, int qr, int l, int r, int v) {
+    if(ql > qr) return 1;
+    if(ql == l && qr == r) return seg[v];
+    int mid = (l + r) >> 1;
+    if(qr <= mid) return query(ql, qr, l, mid, v << 1);
+    if(ql > mid) return query(ql, qr, mid + 1, r, v << 1 | 1);
+    return mmul(query(ql, mid, l, mid, v << 1), query(mid + 1, qr, mid + 1, r, v << 1 | 1), MOD - 1);
+}
 void solve() {
 	int n;
 	cin >> n;
 	int ans[3]{};
 	int val = 1;
-	ans[0] = ans[1] = 1;
-	int sqt = 1;
-	bool flag = 1;
-	for(int i = 0; i < n; ++i) {
-		int x, k;
-		cin >> x >> k;
-		ans[0] = mmul(ans[0], k + 1);
-		ans[1] = mmul(ans[1], mmul(fastpow(x, k + 1) - 1, inv(x - 1)));
-		if(k & 1) flag = 0;
-		sqt = mmul(sqt, fastpow(x, k >> 1));
-		val = mmul(val, fastpow(x, k));
+	ans[0] = ans[1] = ans[2] = 1;
+    int cnt = 1;
+	for(int i = 1; i <= n; ++i) {
+		cin >> x[i] >> k[i];
+		ans[0] = mmul(ans[0], k[i] + 1);
+        ans[1] = mmul(ans[1], mmul(fastpow(x[i], k[i] + 1) - 1, inv(x[i] - 1)));
 	}
-	ans[2] = fastpow(val, mmul(cnt, inv(2, MOD - 1), MOD - 1));
-	if(flag) ans[2] = mmul(ans[2], sqt);
+    build(1, n, 1);
+    for(int i = 1; i <= n; ++i) {
+        int cnt = mabs(1ll * k[i] * (k[i] + 1) >> 1, MOD - 1);    
+        int mul = mmul(query(1, i - 1, 1, n, 1), query(i + 1, n, 1, n, 1), MOD - 1);
+        ans[2] = mmul(ans[2], fastpow(x[i], mmul(mul, cnt, MOD - 1)));
+    }
 	for(int i = 0; i < 3; ++i) {
 		cout << ans[i] << " \n"[i == 2];
 	}
