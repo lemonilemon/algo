@@ -44,20 +44,26 @@ void solve() {
 		cin >> t;
 		r.emplace_back(t);
 	}
-	unordered_map<ll, int> mp;
+	vector<ll> lvals, rvals;
 	val[0] = 0;
-	++mp[0];
-	for(int i = 1; i < (1 << (n >> 1)); ++i) {
-		val[i] = val[i ^ (1 << __lg(i))] + l[__lg(i)];
-		++mp[val[i]];
-	}
+    lvals.emplace_back(0);
+    int lsz = n >> 1, rsz = n - lsz;
+    for(int i = 1; i < (1 << lsz); ++i) {
+        val[i] = val[i ^ (1 << __lg(i))] + l[__lg(i)];
+        lvals.emplace_back(val[i]);
+    }
 	val[0] = 0;
-	ll ans = mp[x];
-	for(int i = 1; i < (1 << (int)r.size()); ++i) {
-		val[i] = val[i ^ (1 << __lg(i))] + r[__lg(i)];
-		ans += mp[x - val[i]];
-	}
-	cout << ans << '\n';
+    rvals.emplace_back(0);
+    for(int i = 1; i < (1 << rsz); ++i) {
+        val[i] = val[i ^ (1 << __lg(i))] + r[__lg(i)];
+        rvals.emplace_back(val[i]);
+    }
+    ll ans = 0;
+    sort(lvals.begin(), lvals.end());
+    for(auto& k : rvals) {
+        ans += upper_bound(lvals.begin(), lvals.end(), x - k) - lower_bound(lvals.begin(), lvals.end(), x - k);
+    }
+    cout << ans << '\n';
 }
 
 int main() {
