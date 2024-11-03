@@ -11,7 +11,7 @@ using namespace std;
 using ll = long long int;
 
 
-#define LOCAL
+// #define LOCAL
 
 // debug template
 #ifdef LOCAL
@@ -38,7 +38,7 @@ template <typename T> void _expand(const char *s, int nl, int nr, T l, T r) {
 // constants
 const int MAXN = 4e5 + 5;
 const int MAXQ = 2e5 + 5;
-int ans[MAXQ];
+ll ans[MAXQ];
 vector<int> graph[MAXN], rgraph[MAXN];
 vector<pair<int, int> > edges;
 
@@ -107,14 +107,13 @@ void rdfs(int u, int k) {
 }
 
 void rec(int l, int r, const vector<int>& ids) {
-    if(l == r) {
-        debug(l, ans[l]);
+    if(l == r - 1) {
         ans[l] = currentsum;
         return;
     }
     int mid = (l + r) >> 1;
     for(auto id : ids) {
-        if(id > mid) continue;
+        if(id >= mid) continue;
         auto [u, v] = edges[id];
         u = dsu.findroot(u);
         v = dsu.findroot(v);
@@ -129,6 +128,7 @@ void rec(int l, int r, const vector<int>& ids) {
     }
     ord.clear();
     for(auto id : ids) {
+        if(id >= mid) continue;
         auto [u, v] = edges[id];
         u = dsu.findroot(u);
         v = dsu.findroot(v);
@@ -142,16 +142,15 @@ void rec(int l, int r, const vector<int>& ids) {
     for(auto u : ord) {
         if(!scc[u]) rdfs(u, ++scccnt);
     }
-    debug(l, r, scccnt);
     int t = dsu.oldval.size(); // timestamp
     for(auto id : ids) {
-        if(id > mid) continue;
+        if(id >= mid) continue;
         auto [u, v] = edges[id];
         dsu.setunion(u, v);
     }
     vector<int> tl, tr;
     for(auto id : ids) {
-        if(id > mid) {
+        if(id >= mid) {
             tr.push_back(id);
             continue;
         }
@@ -159,13 +158,13 @@ void rec(int l, int r, const vector<int>& ids) {
         if(dsu.findroot(u) == dsu.findroot(v)) tl.push_back(id);
         else tr.push_back(id);
     }
-    rec(mid + 1, r, tr);
+    rec(mid, r, tr);
     while(dsu.oldval.size() > t) {
         *dsu.where.back() = dsu.oldval.back();
         dsu.where.pop_back();
         dsu.oldval.pop_back();
     }
-    rec(mid + 1, r, tl);
+    rec(l, mid, tl);
 }
 
 // solution
@@ -183,9 +182,9 @@ void solve() {
     }
     vector<int> ids(q);
     iota(ids.begin(), ids.end(), 0);
-    rec(0, q - 1, ids);
-    for(int i = 0; i < q; ++i) {
-        debug(i, ans[i]);
+    rec(0, q + 1, ids);
+    for(int i = 1; i <= q; ++i) {
+        cout << ans[i] << '\n';
     }
 }
 
