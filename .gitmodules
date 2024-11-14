@@ -1,3 +1,6 @@
 [submodule "prob/NTU/DSA2024"]
 	path = prob/NTU/DSA2024
 	url = git@dsa2024.csie.org:B12902022.git
+[submodule "prob/NTU/ICPC2024/codebook"]
+	path = prob/NTU/ICPC2024/codebook
+	url = git@github.com:lemonilemon/codebook.git
