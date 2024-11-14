@@ -1,3 +1,2 @@
-DisableFormat: true
 BasedOnStyle: LLVM
 IndentWidth: 4
