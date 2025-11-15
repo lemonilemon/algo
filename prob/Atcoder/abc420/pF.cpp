@@ -38,19 +38,57 @@ template <typename T> void _expand(const char *s, int nl, int nr, T l, T r) {
 #endif
 
 // constants
+const int MAXM = 2e5 + 5;
 vector<vector<int>> mat;
+vector<int> h[MAXM];
+int cur_h_idx[MAXM];
+int mnh[MAXM];
+
 // solution
 void solve() {
-    int n, m;
-    cin >> n >> m;
+    int n, m, k;
+    cin >> n >> m >> k;
     mat.resize(n + 1, vector<int>(m + 1));
     for (int i = 1; i <= n; ++i) {
         for (int j = 1; j <= m; ++j) {
             char c;
             cin >> c;
             mat[i][j] = c == '#';
+            if (mat[i][j])
+                h[j].push_back(i);
         }
     }
+    for (int j = 1; j <= m; ++j) {
+        h[j].push_back(n + 1);
+        cur_h_idx[j] = 0;
+    }
+    ll cnt = 0;
+    for (int i = 1; i <= n; ++i) {
+        for (int j = 1; j <= m; ++j) {
+            while (h[j][cur_h_idx[j]] < i)
+                ++cur_h_idx[j];
+            mnh[j] = h[j][cur_h_idx[j]];
+        }
+        vector<int> stk;
+        stk.push_back(i);
+        for (int j = 1; j <= m + 1; ++j) {
+            while (!stk.empty() && mnh[stk.back()] > mnh[j]) {
+                int lasth = mnh[stk.back()];
+                debug(i, j, stk.back(), lasth);
+                stk.pop_back();
+                int num_w = (j - stk.back() - 1);
+                int num_h = lasth - mnh[stk.back()];
+                ll sum = 1ll * (num_w * (num_w + 1) / 2) * num_h;
+
+                debug(i, j, num_w, num_h, sum);
+                cnt += sum;
+            }
+            if (mnh[stk.back()] != mnh[j]) {
+                stk.push_back(j);
+            }
+        }
+    }
+    cout << cnt << '\n';
 }
 
 // main
