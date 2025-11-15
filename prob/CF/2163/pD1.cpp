@@ -53,7 +53,8 @@ void solve() {
     for (int i = 0; i < q; ++i) {
         cin >> queries[i].first >> queries[i].second;
     }
-    bool left_zero = ask(1, n >> 1) > 0;
+    int mid = n >> 1;
+    bool left_zero = ask(1, mid) > 0;
     sort(queries.begin(), queries.end(), [](auto a, auto b) {
         return a.first == b.first ? a.second > b.second : a.first < b.first;
     });
@@ -65,7 +66,7 @@ void solve() {
         }
         largest_qr = qr;
 
-        if ((left_zero && ql <= (n >> 1)) || (!left_zero && ql > (n >> 1))) {
+        if ((left_zero && ql <= mid) || (!left_zero && qr > mid)) {
             int val = ask(ql, qr);
             ans = max(val, ans);
         }
