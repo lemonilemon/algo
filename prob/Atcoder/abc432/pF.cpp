@@ -43,7 +43,7 @@ int a[MAXN];
 ll sum[1 << MAXN];
 int dp[1 << MAXN];
 int dif_index[1 << MAXN];
-vector<int> backtrack[1 << MAXN];
+vector<ll> backtrack[1 << MAXN];
 
 // solution
 void solve() {
@@ -61,15 +61,15 @@ void solve() {
         cout << -1 << '\n';
         return;
     }
-    int target = sum[(1 << n) - 1] / n;
+    ll target = sum[(1 << n) - 1] / n;
     for (int i = 1; i < (1 << n); ++i) {
         int cnt = __builtin_popcount(i);
         dp[i] = 1e9;
         for (int j = 0; j < n; ++j) {
             if (i & (1 << j)) {
                 int prev = i ^ (1 << j);
-                int current_dif = sum[i] - target * cnt;
-                int prev_dif = sum[prev] - target * (cnt - 1);
+                ll current_dif = sum[i] - target * cnt;
+                ll prev_dif = sum[prev] - target * (cnt - 1);
                 if (prev_dif != 0 && current_dif != prev_dif) {
                     if (dp[prev] + 1 < dp[i]) {
                         dp[i] = dp[prev] + 1;
@@ -90,7 +90,7 @@ void solve() {
             }
         }
     }
-    vector<vector<int>> ans;
+    vector<vector<ll>> ans;
     int cur = (1 << n) - 1;
     while (cur != 0) {
         if (backtrack[cur][2] != 0)
